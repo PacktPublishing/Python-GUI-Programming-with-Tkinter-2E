@@ -47,8 +47,8 @@ num_inp = tk.Spinbox(
   root,
   textvariable=num_var,
   from_=0,
-  increment=1,
-  value=3
+  to=1000,
+  increment=1
 )
 
 # Listboxes don't work well with variables,

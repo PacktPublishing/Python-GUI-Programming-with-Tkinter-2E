@@ -1,13 +1,13 @@
 """Hello World application for Tkinter"""
 
-# Import all the classes from tkinter
-from tkinter import *
+# Import tkinter
+import tkinter as tk
 
 # Create a root window
-root = Tk()
+root = tk.Tk()
 
 # Create a widget
-label = Label(root, text="Hello World")
+label = tk.Label(root, text="Hello World")
 
 # Place the label on the root window
 label.pack()
