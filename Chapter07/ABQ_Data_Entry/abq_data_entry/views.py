@@ -182,19 +182,30 @@ class DataRecordForm(tk.Frame):
   def _on_save(self):
     self.event_generate('<<SaveRecord>>')
 
+  @staticmethod
+  def tclerror_is_blank_value(exception):
+    blank_value_errors = (
+      'expected integer but got ""',
+      'expected floating-point number but got ""',
+      'expected boolean value but got ""'
+    )
+    is_bve = str(exception).strip() in blank_value_errors
+    return is_bve
+
   def get(self):
     """Retrieve data from form as a dict"""
 
     # We need to retrieve the data from Tkinter variables
     # and place it in regular Python objects
     data = dict()
-    for key, variable in self._vars.items():
+    for key, var in self._vars.items():
       try:
-        data[key] = variable.get()
-      except tk.TclError:
-        message = f'Error in field: {key}.  Data was not saved!'
-        raise ValueError(message)
-
+        data[key] = var.get()
+      except tk.TclError as e:
+        if self.tclerror_is_blank_value(e):
+          data[key] = None
+        else:
+          raise e
     return data
 
   def reset(self):
