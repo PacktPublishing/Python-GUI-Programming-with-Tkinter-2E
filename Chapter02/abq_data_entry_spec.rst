@@ -7,29 +7,29 @@ Description
 This program facilitates entry of laboratory observations
 into a CSV file.
 
-Functionality Required
-----------------------
+Requirements
+------------
 
-The program must:
+Functional Requirements:
 
-  * allow all relevant, valid data to be entered,
-    as per the data dictionary
-  * append entered data to a CSV file:
+  * Allow all relevant, valid data to be entered,
+    as per the data dictionary.
+  * Append entered data to a CSV file:
     - The CSV file must have a filename of
     abq_data_record_CURRENTDATE.csv, where CURRENTDATE is the date
-    of the laboratory observations in ISO format (Year-month-day)
-    - The CSV file must include all fields
-    listed in the data dictionary
-    - The CSV headers will avoid cryptic abbreviations
-  * enforce correct datatypes per field
+    of the laboratory observations in ISO format (Year-month-day).
+    - The CSV file must include all fields.
+    listed in the data dictionary.
+    - The CSV headers will avoid cryptic abbreviations.
+  * Enforce correct datatypes per field.
 
-The program should try, whenever possible, to:
+Non-functional Requirements:
 
-  * enforce reasonable limits on data entered, per the data dict
-  * Auto-fill data to save time
-  * Suggest likely correct values
-  * Provide a smooth and efficient workflow
-  * Store data in a format easily understandable by Python
+  * Enforce reasonable limits on data entered, per the data dict.
+  * Auto-fill data to save time.
+  * Suggest likely correct values.
+  * Provide a smooth and efficient workflow.
+  * Store data in a format easily understandable by Python.
 
 Functionality Not Required
 --------------------------
@@ -69,19 +69,19 @@ Data Dictionary
 |Plot        |Int     |    | 1 - 20        |Plot ID             |
 +------------+--------+----+---------------+--------------------+
 |Seed        |String  |    | 6-character   |Seed sample ID      |
-|sample      |        |    | string        |                    |
+|Sample      |        |    | string        |                    |
 +------------+--------+----+---------------+--------------------+
 |Fault       |Bool    |    | True, False   |Environmental       |
-|            |        |    |               |Sensor Fault        |
+|            |        |    |               |sensor fault        |
 +------------+--------+----+---------------+--------------------+
-|Light       |Decimal |klx | 0 - 100       |Light at plot.      |
-|            |        |    |               |blank on fault.     |
+|Light       |Decimal |klx | 0 - 100       |Light at plot       |
+|            |        |    |               |blank on fault      |
 +------------+--------+----+---------------+--------------------+
 |Humidity    |Decimal |g/m³| 0.5 - 52.0    |Abs humidity at plot|
-|            |        |    |               |blank on fault.     |
+|            |        |    |               |blank on fault      |
 +------------+--------+----+---------------+--------------------+
 |Temperature |Decimal |°C  | 4 - 40        |Temperature at plot |
-|            |        |    |               |blank on fault.     |
+|            |        |    |               |blank on fault      |
 +------------+--------+----+---------------+--------------------+
 |Blossoms    |Int     |    | 0 - 1000      |No. blossoms in plot|
 +------------+--------+----+---------------+--------------------+
