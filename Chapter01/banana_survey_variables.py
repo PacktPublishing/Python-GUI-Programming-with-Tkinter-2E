@@ -54,12 +54,15 @@ num_inp = tk.Spinbox(
 # Listboxes don't work well with variables,
 # However OptionMenu works great!
 color_var = tk.StringVar(value='Any')
-color_label = tk.Label(root, text='What is the best color for a banana?')
+color_label = tk.Label(
+  root,
+  text='What is the best color for a banana?'
+)
 color_choices = (
   'Any', 'Green', 'Green Yellow', 'Yellow', 'Brown Spotted', 'Black'
 )
 color_inp = tk.OptionMenu(
-    root, color_var, *color_choices
+  root, color_var, *color_choices
 )
 
 plantain_label = tk.Label(root, text='Do you eat plantains?')
@@ -73,16 +76,16 @@ plantain_var = tk.BooleanVar()
 # The radio buttons are connected by using the same variable
 # The value of the var will be set to the button's 'value' property value
 plantain_yes_inp = tk.Radiobutton(
-    plantain_frame,
-    text='Yes',
-    value=True,
-    variable=plantain_var
+  plantain_frame,
+  text='Yes',
+  value=True,
+  variable=plantain_var
 )
 plantain_no_inp = tk.Radiobutton(
-    plantain_frame,
-    text='Ewww, no!',
-    value=False,
-    variable=plantain_var
+  plantain_frame,
+  text='Ewww, no!',
+  value=False,
+  variable=plantain_var
 )
 
 # The Text widget doesn't support variables, sadly

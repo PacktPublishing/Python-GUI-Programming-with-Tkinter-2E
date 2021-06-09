@@ -31,15 +31,24 @@ name_label = tk.Label(root, text='What is your name?')
 name_inp = tk.Entry(root)
 
 # Use Checkbutton to get a boolean
-eater_inp = tk.Checkbutton(root, text='Check this box if you eat bananas')
+eater_inp = tk.Checkbutton(
+  root,
+  text='Check this box if you eat bananas'
+)
 
 # Spinboxes are good for number entry
-num_label = tk.Label(root, text='How many bananas do you eat per day?')
-num_inp = tk.Spinbox(root, from_=0, increment=1, value=3)
+num_label = tk.Label(
+  root,
+  text='How many bananas do you eat per day?'
+)
+num_inp = tk.Spinbox(root, from_=0, to=1000, increment=1)
 
 # Listbox is good for choices
 
-color_label = tk.Label(root, text='What is the best color for a banana?')
+color_label = tk.Label(
+  root,
+  text='What is the best color for a banana?'
+)
 color_inp = tk.Listbox(root, height=1)  # Only show selected item
 # add choices
 color_choices = (
