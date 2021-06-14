@@ -28,9 +28,9 @@ root.columnconfigure(0, weight=1)
 
 # Application heading
 ttk.Label(
-    root,
-    text="ABQ Data Entry Application",
-    font=("TkDefaultFont", 16)
+  root,
+  text="ABQ Data Entry Application",
+  font=("TkDefaultFont", 16)
 ).grid()
 
 ####################
@@ -65,14 +65,14 @@ time_values = ['8:00', '12:00', '16:00', '20:00']
 variables['Time'] = tk.StringVar()
 ttk.Label(r_info, text='Time').grid(row=0, column=1)
 ttk.Combobox(
-    r_info, textvariable=variables['Time'], values=time_values
+  r_info, textvariable=variables['Time'], values=time_values
 ).grid(row=1, column=1, sticky=(tk.W + tk.E))
 
 # Technician
 variables['Technician'] = tk.StringVar()
 ttk.Label(r_info, text='Technician').grid(row=0, column=2)
 ttk.Entry(
-    r_info, textvariable=variables['Technician']
+  r_info, textvariable=variables['Technician']
 ).grid(row=1, column=2, sticky=(tk.W + tk.E))
 
 # Lab
@@ -89,17 +89,17 @@ labframe.grid(row=3, column=0, sticky=(tk.W + tk.E))
 variables['Plot'] = tk.IntVar()
 ttk.Label(r_info, text='Plot').grid(row=2, column=1)
 ttk.Combobox(
-    r_info,
-    textvariable=variables['Plot'],
-    values=list(range(1, 21))
+  r_info,
+  textvariable=variables['Plot'],
+  values=list(range(1, 21))
 ).grid(row=3, column=1, sticky=(tk.W + tk.E))
 
 # Seed Sample
-variables['Seed sample'] = tk.StringVar()
+variables['Seed Sample'] = tk.StringVar()
 ttk.Label(r_info, text='Seed Sample').grid(row=2, column=2)
 ttk.Entry(
-    r_info,
-    textvariable=variables['Seed sample']
+  r_info,
+  textvariable=variables['Seed Sample']
 ).grid(row=3, column=2, sticky=(tk.W + tk.E))
 
 #################################
@@ -122,16 +122,16 @@ ttk.Spinbox(
 variables['Light'] = tk.DoubleVar()
 ttk.Label(e_info, text='Light (klx)').grid(row=0, column=1)
 ttk.Spinbox(
-    e_info, textvariable=variables['Light'],
-    from_=0, to=100, increment=0.01
+  e_info, textvariable=variables['Light'],
+  from_=0, to=100, increment=0.01
 ).grid(row=1, column=1, sticky=(tk.W + tk.E))
 
 # Temperature
 variables['Temperature'] = tk.DoubleVar()
 ttk.Label(e_info, text='Temperature (°C)').grid(row=0, column=2)
 ttk.Spinbox(
-    e_info, textvariable=variables['Temperature'],
-    from_=4, to=40, increment=.01
+  e_info, textvariable=variables['Temperature'],
+  from_=4, to=40, increment=.01
 ).grid(row=1, column=2, sticky=(tk.W + tk.E))
 
 # Equipment Fault
@@ -154,48 +154,48 @@ for i in range(3):
 variables['Plants'] = tk.IntVar()
 ttk.Label(p_info, text='Plants').grid(row=0, column=0)
 ttk.Spinbox(
-    p_info, textvariable=variables['Plants'],
-    from_=0, to=20, increment=1
+  p_info, textvariable=variables['Plants'],
+  from_=0, to=20, increment=1
 ).grid(row=1, column=0, sticky=(tk.W + tk.E))
 
 # Blossoms
 variables['Blossoms'] = tk.IntVar()
 ttk.Label(p_info, text='Blossoms').grid(row=0, column=1)
 ttk.Spinbox(
-    p_info, textvariable=variables['Blossoms'],
-    from_=0, to=1000, increment=1
+  p_info, textvariable=variables['Blossoms'],
+  from_=0, to=1000, increment=1
 ).grid(row=1, column=1, sticky=(tk.W + tk.E))
 
 # Fruit
 variables['Fruit'] = tk.IntVar()
 ttk.Label(p_info, text='Fruit').grid(row=0, column=2)
 ttk.Spinbox(
-    p_info, textvariable=variables['Fruit'],
-    from_=0, to=1000, increment=1
+  p_info, textvariable=variables['Fruit'],
+  from_=0, to=1000, increment=1
 ).grid(row=1, column=2, sticky=(tk.W + tk.E))
 
 # Min Height
 variables['Min Height'] = tk.DoubleVar()
 ttk.Label(p_info, text='Min Height (cm)').grid(row=2, column=0)
 ttk.Spinbox(
-    p_info, textvariable=variables['Min Height'],
-    from_=0, to=1000, increment=0.01
+  p_info, textvariable=variables['Min Height'],
+  from_=0, to=1000, increment=0.01
 ).grid(row=3, column=0, sticky=(tk.W + tk.E))
 
 # Max Height
 variables['Max Height'] = tk.DoubleVar()
 ttk.Label(p_info, text='Max Height (cm)').grid(row=2, column=1)
 ttk.Spinbox(
-    p_info, textvariable=variables['Max Height'],
-    from_=0, to=1000, increment=0.01
+  p_info, textvariable=variables['Max Height'],
+  from_=0, to=1000, increment=0.01
 ).grid(row=3, column=1, sticky=(tk.W + tk.E))
 
 # Med Height
 variables['Med Height'] = tk.DoubleVar()
 ttk.Label(p_info, text='Median Height (cm)').grid(row=2, column=2)
 ttk.Spinbox(
-    p_info, textvariable=variables['Med Height'],
-    from_=0, to=1000, increment=0.01
+  p_info, textvariable=variables['Med Height'],
+  from_=0, to=1000, increment=0.01
 ).grid(row=3, column=2, sticky=(tk.W + tk.E))
 
 
@@ -244,7 +244,7 @@ def on_reset():
     else:
       variable.set('')
 
-    # reset notes_inp
+  # reset notes_inp
   notes_inp.delete('1.0', tk.END)
 
 
