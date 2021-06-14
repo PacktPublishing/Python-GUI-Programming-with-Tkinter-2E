@@ -53,10 +53,8 @@ for i in range(3):
 
 # Date
 variables['Date'] = tk.StringVar()
-ttk.Label(r_info, text='Date').grid(
-  row=0, column=0, sticky=(tk.W + tk.E)
-)
-ttk.Entry(
+ttk.Label(r_info, text='Date').grid(row=0, column=0)
+tk.Entry(
   r_info, textvariable=variables['Date']
 ).grid(row=1, column=0, sticky=(tk.W + tk.E))
 
@@ -263,24 +261,22 @@ def on_save():
 
   # get the data from the variables
   data = dict()
+  fault = variables['Equipment Fault'].get()
   for key, variable in variables.items():
-    try:
-      data[key] = variable.get()
-    except tk.TclError:
-      status_variable.set(
-        f'Error in field: {key}.  Data was not saved!')
-      return
+    if fault and key in ('Light', 'Humidity', 'Temperature'):
+      data[key] = ''
+    else:
+      try:
+        data[key] = variable.get()
+      except tk.TclError:
+        status_variable.set(
+          f'Error in field: {key}.  Data was not saved!')
+        return
   # get the Text widget contents separately
   data['Notes'] = notes_inp.get('1.0', tk.END)
 
-  # clear the environmental data when there is a sensor fault
-  if data['Equipment Fault']:
-    data['Light'] = ''
-    data['Humidity'] = ''
-    data['Temperature'] = ''
-
   # Append the record to a CSV
-  with open(filename, 'a') as fh:
+  with open(filename, 'a', newline='') as fh:
     csvwriter = csv.DictWriter(fh, fieldnames=data.keys())
     if newfile:
       csvwriter.writeheader()
