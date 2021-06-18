@@ -13,7 +13,7 @@ my_bool_var = tk.BooleanVar()
 pack_args = {"padx": 20, "pady": 20}
 
 def my_callback(*_):
-    print("Callback called!")
+  print("Callback called!")
 
 # Entry
 
@@ -23,30 +23,30 @@ myentry.pack(**pack_args)
 # Spinbox
 
 myspinbox = ttk.Spinbox(
-    root,
-    from_=0, to=100, increment=.01,
-    textvariable=my_int_var,
-    command=my_callback
+  root,
+  from_=0, to=100, increment=.01,
+  textvariable=my_int_var,
+  command=my_callback
 )
 myspinbox.pack(**pack_args)
 
 # Checkbutton
 
 mycheckbutton = ttk.Checkbutton(
-    root,
-    variable=my_bool_var,
-    textvariable=my_string_var,
-    command=my_callback
+  root,
+  variable=my_bool_var,
+  textvariable=my_string_var,
+  command=my_callback
 )
 mycheckbutton.pack(**pack_args)
 
 mycheckbutton2 = ttk.Checkbutton(
-    root,
-    variable=my_dbl_var,
-    text='Would you like Pi?',
-    onvalue=3.14159,
-    offvalue=0,
-    underline=15
+  root,
+  variable=my_dbl_var,
+  text='Would you like Pi?',
+  onvalue=3.14159,
+  offvalue=0,
+  underline=15
 )
 mycheckbutton2.pack(**pack_args)
 
@@ -55,16 +55,16 @@ buttons = tk.Frame(root)
 buttons.pack()
 
 r1 = ttk.Radiobutton(
-    buttons,
-    variable=my_int_var,
-    value=1,
-    text='One'
+  buttons,
+  variable=my_int_var,
+  value=1,
+  text='One'
 )
 r2 = ttk.Radiobutton(
-    buttons,
-    variable=my_int_var,
-    value=2,
-    text='Two'
+  buttons,
+  variable=my_int_var,
+  value=2,
+  text='Two'
 )
 r1.pack(side='left')
 r2.pack(side='left')
@@ -72,18 +72,18 @@ r2.pack(side='left')
 # Combobox Widget
 
 mycombo = ttk.Combobox(
-    root, textvariable=my_string_var,
-    values=['This option', 'That option', 'Another option']
+  root, textvariable=my_string_var,
+  values=['This option', 'That option', 'Another option']
 )
 mycombo.pack(**pack_args)
 
 # Text widget
 
 mytext = tk.Text(
-    root,
-    undo=True, maxundo=100,
-    spacing1=10, spacing2=2, spacing3=5,
-    height=5, wrap='char'
+  root,
+  undo=True, maxundo=100,
+  spacing1=10, spacing2=2, spacing3=5,
+  height=5, wrap='char'
 )
 mytext.pack(**pack_args)
 
@@ -102,26 +102,26 @@ mytext.delete('end - 2 chars')
 # Button widget
 
 mybutton = ttk.Button(
-    root,
-    command=my_callback,
-    text='Click Me!',
-    default='active'
+  root,
+  command=my_callback,
+  text='Click Me!',
+  default='active'
 )
 mybutton.pack(**pack_args)
 
 # LabelFrame Widget
 mylabelframe = ttk.LabelFrame(
-    root,
-    text='Button frame'
+  root,
+  text='Button frame'
 )
 
 b1 = ttk.Button(
-    mylabelframe,
-    text='Button 1'
+  mylabelframe,
+  text='Button 1'
 )
 b2 = ttk.Button(
-    mylabelframe,
-    text='Button 2'
+  mylabelframe,
+  text='Button 2'
 )
 b1.pack()
 b2.pack()
