@@ -18,37 +18,23 @@ class BoundText(tk.Text):
   def __init__(self, *args, textvariable=None, **kwargs):
     super().__init__(*args, **kwargs)
     self._variable = textvariable
-    self._modifying = False
     if self._variable:
       # insert any default value
       self.insert('1.0', self._variable.get())
       self._variable.trace_add('write', self._set_content)
       self.bind('<<Modified>>', self._set_var)
 
-  def _clear_modified_flag(self):
-    # This also triggers a '<<Modified>>' Event
-    self.tk.call(self._w, 'edit', 'modified', 0)
-
   def _set_var(self, *_):
     """Set the variable to the text contents"""
-    if self._modifying:
-      return
-    self._modifying = True
-    # remove trailing newline from content
-    content = self.get('1.0', tk.END)[:-1]
-    self._variable.set(content)
-    self._clear_modified_flag()
-    self._modifying = False
+    if self.edit_modified():
+      content = self.get('1.0', 'end-1chars')
+      self._variable.set(content)
+      self.edit_modified(False)
 
   def _set_content(self, *_):
     """Set the text contents to the variable"""
-    if self._modifying:
-      return
-    self._modifying = True
     self.delete('1.0', tk.END)
     self.insert('1.0', self._variable.get())
-    self._modifying = False
-
 
 #########################################
 # Creating a LabelInput compound widget #
@@ -150,7 +136,8 @@ class DataRecordForm(tk.Frame):
       r_info, "Date", var=self._vars['Date']
     ).grid(row=0, column=0)
     LabelInput(
-      r_info, "Time", input_class=ttk.Combobox, var=self._vars['Time'],
+      r_info, "Time", input_class=ttk.Combobox,
+      var=self._vars['Time'],
       input_args={"values": ["8:00", "12:00", "16:00", "20:00"]}
     ).grid(row=0, column=1)
     LabelInput(
@@ -242,7 +229,7 @@ class DataRecordForm(tk.Frame):
     buttons = ttk.Frame(self)
     buttons.grid(sticky=tk.W + tk.E, row=4)
     self.savebutton = ttk.Button(
-      buttons, text="Save", command=self.master.on_save)
+      buttons, text="Save", command=self.master._on_save)
     self.savebutton.pack(side=tk.RIGHT)
 
     self.resetbutton = ttk.Button(
@@ -258,12 +245,16 @@ class DataRecordForm(tk.Frame):
     # We need to retrieve the data from Tkinter variables
     # and place it in regular Python objects
     data = dict()
+    fault = self._vars['Equipment Fault'].get()
     for key, variable in self._vars.items():
-      try:
-        data[key] = variable.get()
-      except tk.TclError:
-        message = f'Error in field: {key}.  Data was not saved!'
-        raise ValueError(message)
+      if fault and key in ('Light', 'Humidity', 'Temperature'):
+        data[key] = ''
+      else:
+        try:
+          data[key] = variable.get()
+        except tk.TclError:
+          message = f'Error in field: {key}.  Data was not saved!'
+          raise ValueError(message)
 
     return data
 
@@ -303,7 +294,7 @@ class Application(tk.Tk):
 
     self._records_saved = 0
 
-  def on_save(self):
+  def _on_save(self):
     """Handles save button clicks"""
 
     # For now, we save to a hardcoded filename with a datestring.
@@ -319,7 +310,7 @@ class Application(tk.Tk):
       self.status.set(str(e))
       return
 
-    with open(filename, 'a') as fh:
+    with open(filename, 'a', newline='') as fh:
       csvwriter = csv.DictWriter(fh, fieldnames=data.keys())
       if newfile:
         csvwriter.writeheader()

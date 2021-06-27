@@ -13,8 +13,7 @@ class JSONVar(tk.StringVar):
   """A Tk variable that can hold dicts and lists"""
 
   def __init__(self, *args, **kwargs):
-    if kwargs.get('value'):
-      kwargs['value'] = json.dumps(kwargs['value'])
+    kwargs['value'] = json.dumps(kwargs.get('value'))
     super().__init__(*args, **kwargs)
 
   def set(self, value, *args, **kwargs):
@@ -45,10 +44,13 @@ class JSONVar(tk.StringVar):
 class LabelInput(tk.Frame):
   """A label and input combined together"""
 
-  def __init__(self, parent, label, inp_class, inp_args, *args, **kwargs):
+  def __init__(
+    self, parent, label, inp_cls,
+    inp_args, *args, **kwargs
+   ):
     super().__init__(parent, *args, **kwargs)
     self.label = tk.Label(self, text=label, anchor='w')
-    self.input = inp_class(self, **inp_args)
+    self.input = inp_cls(self, **inp_args)
 
     # side-by-side layout
     self.columnconfigure(1, weight=1)
@@ -135,6 +137,6 @@ class Application(tk.Tk):
     self.output_var.set(output)
 
 #root.mainloop()
-
-app = Application()
-app.mainloop()
+if __name__ == '__main__':
+  app = Application()
+  app.mainloop()
