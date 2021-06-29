@@ -148,7 +148,7 @@ class ValidatedCombobox(ValidatedMixin, ttk.Combobox):
 
     # get our values list
     values = self.cget('values')
-    # Do a case-insensitve match against the entered text
+    # Do a case-insensitive match against the entered text
     matching = [
       x for x in values
       if x.lower().startswith(proposed.lower())
@@ -199,7 +199,7 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
     if self.focus_update_var and not self.error.get():
       self.focus_update_var.set(value)
 
-  def _set_minimum(self, *args):
+  def _set_minimum(self, *_):
     current = self.get()
     try:
       new_min = self.min_var.get()
@@ -212,7 +212,7 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
       self.variable.set(current)
     self.trigger_focusout_validation()
 
-  def _set_maximum(self, *args):
+  def _set_maximum(self, *_):
     current = self.get()
     try:
       new_max = self.max_var.get()
@@ -228,13 +228,13 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
   def _key_validate(
     self, char, index, current, proposed, action, **kwargs
   ):
+    if action == '0':
+      return True
     valid = True
     min_val = self.cget('from')
     max_val = self.cget('to')
     no_negative = min_val >= 0
     no_decimal = self.precision >= 0
-    if action == '0':
-      return True
 
     # First, filter out obviously invalid keystrokes
     if any([
@@ -269,16 +269,17 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
     max_val = self.cget('to')
 
     try:
-      value = Decimal(value)
+      d_value = Decimal(value)
     except InvalidOperation:
-      self.error.set('Invalid number string: {}'.format(value))
+      self.error.set(f'Invalid number string: {value}')
       return False
 
-    if value < min_val:
-      self.error.set('Value is too low (min {})'.format(min_val))
+    if d_value < min_val:
+      self.error.set(f'Value is too low (min {min_val})')
       valid = False
-    if value > max_val:
-      self.error.set('Value is too high (max {})'.format(max_val))
+    if d_value > max_val:
+      self.error.set(f'Value is too high (max {max_val})')
+      valid = False
 
     return valid
 
@@ -288,36 +289,23 @@ class BoundText(tk.Text):
   def __init__(self, *args, textvariable=None, **kwargs):
     super().__init__(*args, **kwargs)
     self._variable = textvariable
-    self._modifying = False
     if self._variable:
       # insert any default value
       self.insert('1.0', self._variable.get())
       self._variable.trace_add('write', self._set_content)
       self.bind('<<Modified>>', self._set_var)
 
-  def _clear_modified_flag(self):
-    # This also triggers a '<<Modified>>' Event
-    self.tk.call(self._w, 'edit', 'modified', 0)
-
   def _set_var(self, *_):
     """Set the variable to the text contents"""
-    if self._modifying:
-      return
-    self._modifying = True
-    # remove trailing newline from content
-    content = self.get('1.0', tk.END)[:-1]
-    self._variable.set(content)
-    self._clear_modified_flag()
-    self._modifying = False
+    if self.edit_modified():
+      content = self.get('1.0', 'end-1chars')
+      self._variable.set(content)
+      self.edit_modified(False)
 
   def _set_content(self, *_):
     """Set the text contents to the variable"""
-    if self._modifying:
-      return
-    self._modifying = True
     self.delete('1.0', tk.END)
     self.insert('1.0', self._variable.get())
-    self._modifying = False
 
 ##################
 # Module Classes #
@@ -595,7 +583,9 @@ class DataRecordForm(tk.Frame):
       plot = self._vars['Plot'].get()
     except tk.TclError:
       plot = ''
-    plot_values = self._vars['Plot'].label_widget.input.cget('values')
+    plot_values = (
+      self._vars['Plot'].label_widget.input.cget('values')
+    )
 
     # clear all values
     for var in self._vars.values():

@@ -9,17 +9,17 @@ class DateEntry(ttk.Entry):
     super().__init__(parent, *args, **kwargs)
     self.configure(
       validate='all',
-      validatecommand=(self.register(self._validate),  '%S', '%i', '%V', '%d'),
+      validatecommand=(
+        self.register(self._validate),
+        '%S', '%i', '%V', '%d'
+      ),
       invalidcommand=(self.register(self._on_invalid), '%V')
     )
     self.error = tk.StringVar()
 
   def _toggle_error(self, error=''):
     self.error.set(error)
-    if error:
-      self.config(foreground='red')
-    else:
-      self.config(foreground='black')
+    self.config(foreground='red' if error else 'black')
 
   def _validate(self, char, index, event, action):
 
@@ -53,7 +53,7 @@ if __name__ == '__main__':
   entry = DateEntry(root)
   entry.pack()
   ttk.Label(
-      textvariable=entry.error, foreground='red'
+    textvariable=entry.error, foreground='red'
   ).pack()
 
   # add this so we can unfocus the DateEntry
