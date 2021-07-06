@@ -46,12 +46,12 @@ class Application(tk.Tk):
         "Cannot save, error in fields: {}"
         .format(', '.join(errors.keys()))
       )
-      return False
+      return
 
     data = self.recordform.get()
     self.model.save_record(data)
     self.records_saved += 1
     self.status.set(
-      "{} records saved this session".format(self.records_saved)
+      f"{self.records_saved} records saved this session"
     )
     self.recordform.reset()

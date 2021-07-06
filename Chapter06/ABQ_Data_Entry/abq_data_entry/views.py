@@ -57,20 +57,20 @@ class DataRecordForm(tk.Frame):
       var=self._vars['Time'],
     ).grid(row=0, column=1)
     w.LabelInput(
+      r_info, "Technician",
+      field_spec=fields['Technician'],
+      var=self._vars['Technician'],
+    ).grid(row=0, column=2)
+    # line 2
+    w.LabelInput(
       r_info, "Lab",
       field_spec=fields['Lab'],
       var=self._vars['Lab'],
-    ).grid(row=0, column=2)
-    # line 2
+    ).grid(row=1, column=0)
     w.LabelInput(
       r_info, "Plot",
       field_spec=fields['Plot'],
       var=self._vars['Plot'],
-    ).grid(row=1, column=0)
-    w.LabelInput(
-      r_info, "Technician",
-      field_spec=fields['Technician'],
-      var=self._vars['Technician'],
     ).grid(row=1, column=1)
     w.LabelInput(
       r_info, "Seed Sample",
