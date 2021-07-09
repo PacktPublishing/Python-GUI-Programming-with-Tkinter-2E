@@ -64,7 +64,7 @@ class CSVModel:
     """Save a dict of data to the CSV file"""
     newfile = not self.file.exists()
 
-    with open(self.file, 'a') as fh:
+    with open(self.file, 'a', newline='') as fh:
       csvwriter = csv.DictWriter(fh, fieldnames=self.fields.keys())
       if newfile:
         csvwriter.writeheader()
