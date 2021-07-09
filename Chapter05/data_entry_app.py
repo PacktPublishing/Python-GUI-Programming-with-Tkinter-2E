@@ -283,6 +283,23 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
 
     return valid
 
+class ValidatedRadio(ttk.Radiobutton):
+  """A validated radio button"""
+
+  def __init__(self, *args, error_var=None, **kwargs):
+    super().__init__(*args, **kwargs)
+    self.error = error_var or tk.StringVar()
+    self.variable = kwargs.get("variable")
+    self.bind('<FocusOut>', self._focusout_validate)
+
+  def _focusout_validate(self, *_):
+    self.error.set('')
+    if not self.variable.get():
+      self.error.set('A value is required')
+
+  def trigger_focusout_validation(self):
+    self._focusout_validate()
+
 class BoundText(tk.Text):
   """A Text widget with a bound variable."""
 
@@ -335,19 +352,24 @@ class LabelInput(ttk.Frame):
       self.label.grid(row=0, column=0, sticky=(tk.W + tk.E))
 
     # setup the variable
-    if input_class in (ttk.Checkbutton, ttk.Button, ttk.Radiobutton):
+    if input_class in (
+        ttk.Checkbutton, ttk.Button, ttk.Radiobutton, ValidatedRadio
+    ):
       input_args["variable"] = self.variable
     else:
       input_args["textvariable"] = self.variable
 
     # Setup the input
-    if input_class == ttk.Radiobutton:
+    if input_class in (ttk.Radiobutton, ValidatedRadio):
       # for Radiobutton, create one input per value
       self.input = tk.Frame(self)
       for v in input_args.pop('values', []):
-        button = ttk.Radiobutton(
-          self.input, value=v, text=v, **input_args)
+        button = input_class(
+          self.input, value=v, text=v, **input_args
+        )
         button.pack(side=tk.LEFT, ipadx=10, ipady=2, expand=True, fill='x')
+      self.input.error = getattr(button, 'error')
+      self.input.trigger_focusout_validation = button.trigger_focusout_validation
     else:
       self.input = input_class(self, **input_args)
     self.input.grid(row=1, column=0, sticky=(tk.W + tk.E))
@@ -438,7 +460,7 @@ class DataRecordForm(tk.Frame):
 
     # line 2
     LabelInput(
-      r_info, "Lab", input_class=ttk.Radiobutton,
+      r_info, "Lab", input_class=ValidatedRadio,
       var=self._vars['Lab'], input_args={"values": ["A", "B", "C"]}
     ).grid(row=1, column=0)
     LabelInput(
@@ -668,7 +690,7 @@ class Application(tk.Tk):
     # If it doesnt' exist, create it,
     # otherwise just append to the existing file
     datestring = datetime.today().strftime("%Y-%m-%d")
-    filename = "abq_data_record_{}.csv".format(datestring)
+    filename = f"abq_data_record_{datestring}.csv"
     newfile = not Path(filename).exists()
 
     data = self.recordform.get()
@@ -681,7 +703,7 @@ class Application(tk.Tk):
 
     self._records_saved += 1
     self.status.set(
-      "{} records saved this session".format(self._records_saved)
+      f"{self._records_saved} records saved this session"
     )
     self.recordform.reset()
 
