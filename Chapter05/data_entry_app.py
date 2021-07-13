@@ -283,22 +283,32 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
 
     return valid
 
-class ValidatedRadio(ttk.Radiobutton):
-  """A validated radio button"""
 
-  def __init__(self, *args, error_var=None, **kwargs):
+class ValidatedRadioGroup(ttk.Frame):
+  """A validated radio button group"""
+
+  def __init__(
+    self, *args, variable=None, error_var=None,
+    values=None, button_args=None, **kwargs
+  ):
     super().__init__(*args, **kwargs)
+    self.variable = variable or tk.StringVar()
     self.error = error_var or tk.StringVar()
-    self.variable = kwargs.get("variable")
-    self.bind('<FocusOut>', self._focusout_validate)
+    self.values = values or list()
+    button_args = button_args or dict()
 
-  def _focusout_validate(self, *_):
+    for v in self.values:
+      button = ttk.Radiobutton(
+        self, value=v, text=v, variable=self.variable, **button_args
+      )
+      button.pack(side=tk.LEFT, ipadx=10, ipady=2, expand=True, fill='x')
+    self.bind('<FocusOut>', self.trigger_focusout_validation)
+
+  def trigger_focusout_validation(self, *_):
     self.error.set('')
     if not self.variable.get():
       self.error.set('A value is required')
 
-  def trigger_focusout_validation(self):
-    self._focusout_validate()
 
 class BoundText(tk.Text):
   """A Text widget with a bound variable."""
@@ -353,14 +363,15 @@ class LabelInput(ttk.Frame):
 
     # setup the variable
     if input_class in (
-        ttk.Checkbutton, ttk.Button, ttk.Radiobutton, ValidatedRadio
+      ttk.Checkbutton, ttk.Button,
+      ttk.Radiobutton, ValidatedRadioGroup
     ):
       input_args["variable"] = self.variable
     else:
       input_args["textvariable"] = self.variable
 
     # Setup the input
-    if input_class in (ttk.Radiobutton, ValidatedRadio):
+    if input_class == ttk.Radiobutton:
       # for Radiobutton, create one input per value
       self.input = tk.Frame(self)
       for v in input_args.pop('values', []):
@@ -368,8 +379,6 @@ class LabelInput(ttk.Frame):
           self.input, value=v, text=v, **input_args
         )
         button.pack(side=tk.LEFT, ipadx=10, ipady=2, expand=True, fill='x')
-      self.input.error = getattr(button, 'error')
-      self.input.trigger_focusout_validation = button.trigger_focusout_validation
     else:
       self.input = input_class(self, **input_args)
     self.input.grid(row=1, column=0, sticky=(tk.W + tk.E))
@@ -460,7 +469,7 @@ class DataRecordForm(tk.Frame):
 
     # line 2
     LabelInput(
-      r_info, "Lab", input_class=ValidatedRadio,
+      r_info, "Lab", input_class=ValidatedRadioGroup,
       var=self._vars['Lab'], input_args={"values": ["A", "B", "C"]}
     ).grid(row=1, column=0)
     LabelInput(
