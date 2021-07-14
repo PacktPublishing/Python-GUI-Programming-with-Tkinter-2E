@@ -274,6 +274,35 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
 
     return valid
 
+class ValidatedRadioGroup(ttk.Frame):
+  """A validated radio button group"""
+
+  def __init__(
+    self, *args, variable=None, error_var=None,
+    values=None, button_args=None, **kwargs
+  ):
+    super().__init__(*args, **kwargs)
+    self.variable = variable or tk.StringVar()
+    self.error = error_var or tk.StringVar()
+    self.values = values or list()
+    self.button_args = button_args or dict()
+
+    for v in self.values:
+      button = ttk.Radiobutton(
+        self, value=v, text=v,
+        variable=self.variable, **self.button_args
+      )
+      button.pack(
+        side=tk.LEFT, ipadx=10, ipady=2, expand=True, fill='x'
+      )
+    self.bind('<FocusOut>', self.trigger_focusout_validation)
+
+  def trigger_focusout_validation(self, *_):
+    self.error.set('')
+    if not self.variable.get():
+      self.error.set('A value is required')
+
+
 class BoundText(tk.Text):
   """A Text widget with a bound variable."""
 
@@ -310,7 +339,7 @@ class LabelInput(ttk.Frame):
   field_types = {
     FT.string: RequiredEntry,
     FT.string_list: ValidatedCombobox,
-    FT.short_string_list: ttk.Radiobutton,
+    FT.short_string_list: ValidatedRadioGroup,
     FT.iso_date_string: DateEntry,
     FT.long_string: BoundText,
     FT.decimal: ValidatedSpinbox,
@@ -353,7 +382,9 @@ class LabelInput(ttk.Frame):
       self.label.grid(row=0, column=0, sticky=(tk.W + tk.E))
 
     # setup the variable
-    if input_class in (ttk.Checkbutton, ttk.Button, ttk.Radiobutton):
+    if input_class in (
+        ttk.Checkbutton, ttk.Button, ttk.Radiobutton, ValidatedRadioGroup
+    ):
       input_args["variable"] = self.variable
     else:
       input_args["textvariable"] = self.variable
@@ -363,12 +394,12 @@ class LabelInput(ttk.Frame):
       # for Radiobutton, create one input per value
       self.input = tk.Frame(self)
       for v in input_args.pop('values', []):
-        button = ttk.Radiobutton(
-          self.input, value=v, text=v, **input_args)
+        button = input_class(
+          self.input, value=v, text=v, **input_args
+        )
         button.pack(side=tk.LEFT, ipadx=10, ipady=2, expand=True, fill='x')
     else:
       self.input = input_class(self, **input_args)
-
     self.input.grid(row=1, column=0, sticky=(tk.W + tk.E))
     self.columnconfigure(0, weight=1)
 

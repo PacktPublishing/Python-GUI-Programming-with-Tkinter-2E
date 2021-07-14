@@ -568,7 +568,7 @@ class DataRecordForm(tk.Frame):
     buttons = tk.Frame(self)
     buttons.grid(sticky=tk.W + tk.E, row=4)
     self.savebutton = ttk.Button(
-      buttons, text="Save", command=self.master.on_save)
+      buttons, text="Save", command=self.master._on_save)
     self.savebutton.pack(side=tk.RIGHT)
 
     self.resetbutton = ttk.Button(
@@ -682,7 +682,7 @@ class Application(tk.Tk):
 
     self._records_saved = 0
 
-  def on_save(self):
+  def _on_save(self):
     """Handles save button clicks"""
 
     # Check for errors first
