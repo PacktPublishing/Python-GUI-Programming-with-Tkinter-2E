@@ -100,9 +100,8 @@ class SettingsModel:
 
   def save(self):
     """Save the current settings to the file"""
-    json_string = json.dumps(self.fields)
     with open(self.filepath, 'w') as fh:
-      fh.write(json_string)
+      json.dump(self.fields, fh)
 
   def load(self):
     """Load the settings from the file"""
@@ -113,7 +112,7 @@ class SettingsModel:
 
     # open the file and read in the raw values
     with open(self.filepath, 'r') as fh:
-      raw_values = json.loads(fh.read())
+      raw_values = json.load(fh)
 
     # don't implicitly trust the raw values, but only get known keys
     for key in self.fields:

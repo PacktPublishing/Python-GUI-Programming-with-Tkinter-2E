@@ -34,8 +34,8 @@ main_menu.add_cascade(label="Text", menu=text_menu)
 # Add the appearance menu #
 ###########################
 
-font_bold = tk.BooleanVar()
-font_size = tk.IntVar()
+font_bold = tk.BooleanVar(value=False)
+font_size = tk.IntVar(value=10)
 
 def set_font(*args):
   size = font_size.get()
@@ -45,6 +45,8 @@ def set_font(*args):
 
 font_bold.trace_add('write', set_font)
 font_size.trace_add('write', set_font)
+set_font()
+
 
 # Create appearance menu
 appearance_menu = tk.Menu(main_menu, tearoff=False)
