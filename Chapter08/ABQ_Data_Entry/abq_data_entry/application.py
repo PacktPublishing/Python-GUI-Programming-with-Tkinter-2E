@@ -199,12 +199,12 @@ class Application(tk.Tk):
 
   def _new_record(self, *_):
     """Open the record form with a blank record"""
-    self.recordform.load_record(None, None)
+    self.recordform.load_record(None)
     self.notebook.select(self.recordform)
 
 
   def _open_record(self, *_):
-    """Open the Record selected recordlist id in the recordform"""
+    """Open the selected id from recordlist in the recordform"""
     rowkey = self.recordlist.selected_id
     try:
       record = self.model.get_record(rowkey)
@@ -212,6 +212,6 @@ class Application(tk.Tk):
       messagebox.showerror(
         title='Error', message='Problem reading file', detail=str(e)
       )
-      return
-    self.recordform.load_record(rowkey, record)
-    self.notebook.select(self.recordform)
+    else:
+      self.recordform.load_record(rowkey, record)
+      self.notebook.select(self.recordform)

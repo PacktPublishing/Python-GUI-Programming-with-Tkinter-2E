@@ -67,20 +67,20 @@ class DataRecordForm(tk.Frame):
       var=self._vars['Time'],
     ).grid(row=0, column=1)
     w.LabelInput(
+      r_info, "Technician",
+      field_spec=fields['Technician'],
+      var=self._vars['Technician'],
+    ).grid(row=0, column=2)
+    # line 2
+    w.LabelInput(
       r_info, "Lab",
       field_spec=fields['Lab'],
       var=self._vars['Lab'],
-    ).grid(row=0, column=2)
-    # line 2
+    ).grid(row=1, column=0)
     w.LabelInput(
       r_info, "Plot",
       field_spec=fields['Plot'],
       var=self._vars['Plot'],
-    ).grid(row=1, column=0)
-    w.LabelInput(
-      r_info, "Technician",
-      field_spec=fields['Technician'],
-      var=self._vars['Technician'],
     ).grid(row=1, column=1)
     w.LabelInput(
       r_info, "Seed Sample",
@@ -170,7 +170,7 @@ class DataRecordForm(tk.Frame):
     # Notes section  -- Update grid row value for ch8
     w.LabelInput(
       self, "Notes", field_spec=fields['Notes'],
-      var=self._vars['Notes'], input_args={"width": 85, "height": 10}
+      var=self._vars['Notes'], input_args={"width": 85, "height": 6}
     ).grid(sticky="nsew", row=4, column=0, padx=10, pady=10)
 
     # buttons
@@ -369,7 +369,7 @@ class RecordList(tk.Frame):
       self.treeview.column(
         name, anchor=anchor, minwidth=minwidth,
         width=width, stretch=stretch
-        )
+      )
 
     self.treeview.bind('<Double-1>', self._on_open_record)
     self.treeview.bind('<Return>', self._on_open_record)
@@ -389,7 +389,7 @@ class RecordList(tk.Frame):
     for row in self.treeview.get_children():
       self.treeview.delete(row)
 
-    cids = list(self.column_defs.keys())[1:]
+    cids = self.treeview.cget('columns')
     for rownum, rowdata in enumerate(rows):
       values = [rowdata[cid] for cid in cids]
       self.treeview.insert('', 'end', iid=str(rownum),
@@ -401,6 +401,9 @@ class RecordList(tk.Frame):
       self.treeview.focus('0')
 
   def _on_open_record(self, *args):
-
-    self.selected_id = int(self.treeview.selection()[0])
     self.event_generate('<<OpenRecord>>')
+
+  @property
+  def selected_id(self):
+    selection = self.treeview.selection()
+    return int(selection[0]) if selection else None

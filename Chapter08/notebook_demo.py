@@ -14,7 +14,7 @@ notebook.grid()
 banana_facts = [
     'Banana trees are of the genus Musa.',
     'Bananas are technically berries.',
-    'All bananas contain small amounts of radioactive postssium.'
+    'All bananas contain small amounts of radioactive potassium.'
     'Bananas are used in paper and textile manufacturing.'
 ]
 

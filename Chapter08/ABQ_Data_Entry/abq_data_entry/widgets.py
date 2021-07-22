@@ -190,7 +190,7 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
     if self.focus_update_var and not self.error.get():
       self.focus_update_var.set(value)
 
-  def _set_minimum(self, *args):
+  def _set_minimum(self, *_):
     current = self.get()
     try:
       new_min = self.min_var.get()
@@ -203,7 +203,7 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
       self.variable.set(current)
     self.trigger_focusout_validation()
 
-  def _set_maximum(self, *args):
+  def _set_maximum(self, *_):
     current = self.get()
     try:
       new_max = self.max_var.get()
@@ -219,13 +219,13 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
   def _key_validate(
     self, char, index, current, proposed, action, **kwargs
   ):
+    if action == '0':
+      return True
     valid = True
     min_val = self.cget('from')
     max_val = self.cget('to')
     no_negative = min_val >= 0
     no_decimal = self.precision >= 0
-    if action == '0':
-      return True
 
     # First, filter out obviously invalid keystrokes
     if any([
@@ -260,18 +260,45 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
     max_val = self.cget('to')
 
     try:
-      value = Decimal(value)
+      d_value = Decimal(value)
     except InvalidOperation:
-      self.error.set('Invalid number string: {}'.format(value))
+      self.error.set(f'Invalid number string: {value}')
       return False
 
-    if value < min_val:
-      self.error.set('Value is too low (min {})'.format(min_val))
+    if d_value < min_val:
+      self.error.set(f'Value is too low (min {min_val})')
       valid = False
-    if value > max_val:
-      self.error.set('Value is too high (max {})'.format(max_val))
+    if d_value > max_val:
+      self.error.set(f'Value is too high (max {max_val})')
+      valid = False
 
     return valid
+
+class ValidatedRadioGroup(ttk.Frame):
+  """A validated radio button group"""
+
+  def __init__(
+    self, *args, variable=None, error_var=None,
+    values=None, button_args=None, **kwargs
+  ):
+    super().__init__(*args, **kwargs)
+    self.variable = variable or tk.StringVar()
+    self.error = error_var or tk.StringVar()
+    self.values = values or list()
+    button_args = button_args or dict()
+
+    for v in self.values:
+      button = ttk.Radiobutton(
+        self, value=v, text=v, variable=self.variable, **button_args
+      )
+      button.pack(side=tk.LEFT, ipadx=10, ipady=2, expand=True, fill='x')
+    self.bind('<FocusOut>', self.trigger_focusout_validation)
+
+  def trigger_focusout_validation(self, *_):
+    self.error.set('')
+    if not self.variable.get():
+      self.error.set('A value is required')
+
 
 class BoundText(tk.Text):
   """A Text widget with a bound variable."""
@@ -279,36 +306,23 @@ class BoundText(tk.Text):
   def __init__(self, *args, textvariable=None, **kwargs):
     super().__init__(*args, **kwargs)
     self._variable = textvariable
-    self._modifying = False
     if self._variable:
       # insert any default value
       self.insert('1.0', self._variable.get())
       self._variable.trace_add('write', self._set_content)
       self.bind('<<Modified>>', self._set_var)
 
-  def _clear_modified_flag(self):
-    # This also triggers a '<<Modified>>' Event
-    self.tk.call(self._w, 'edit', 'modified', 0)
-
   def _set_var(self, *_):
     """Set the variable to the text contents"""
-    if self._modifying:
-      return
-    self._modifying = True
-    # remove trailing newline from content
-    content = self.get('1.0', tk.END)[:-1]
-    self._variable.set(content)
-    self._clear_modified_flag()
-    self._modifying = False
+    if self.edit_modified():
+      content = self.get('1.0', 'end-1chars')
+      self._variable.set(content)
+      self.edit_modified(False)
 
   def _set_content(self, *_):
     """Set the text contents to the variable"""
-    if self._modifying:
-      return
-    self._modifying = True
     self.delete('1.0', tk.END)
     self.insert('1.0', self._variable.get())
-    self._modifying = False
 
 
 ###########################
@@ -322,7 +336,7 @@ class LabelInput(ttk.Frame):
   field_types = {
     FT.string: RequiredEntry,
     FT.string_list: ValidatedCombobox,
-    FT.short_string_list: ttk.Radiobutton,
+    FT.short_string_list: ValidatedRadioGroup,
     FT.iso_date_string: DateEntry,
     FT.long_string: BoundText,
     FT.decimal: ValidatedSpinbox,
@@ -365,7 +379,9 @@ class LabelInput(ttk.Frame):
       self.label.grid(row=0, column=0, sticky=(tk.W + tk.E))
 
     # setup the variable
-    if input_class in (ttk.Checkbutton, ttk.Button, ttk.Radiobutton):
+    if input_class in (
+        ttk.Checkbutton, ttk.Button, ttk.Radiobutton, ValidatedRadioGroup
+    ):
       input_args["variable"] = self.variable
     else:
       input_args["textvariable"] = self.variable
@@ -375,12 +391,12 @@ class LabelInput(ttk.Frame):
       # for Radiobutton, create one input per value
       self.input = tk.Frame(self)
       for v in input_args.pop('values', []):
-        button = ttk.Radiobutton(
-          self.input, value=v, text=v, **input_args)
+        button = input_class(
+          self.input, value=v, text=v, **input_args
+        )
         button.pack(side=tk.LEFT, ipadx=10, ipady=2, expand=True, fill='x')
     else:
       self.input = input_class(self, **input_args)
-
     self.input.grid(row=1, column=0, sticky=(tk.W + tk.E))
     self.columnconfigure(0, weight=1)
 

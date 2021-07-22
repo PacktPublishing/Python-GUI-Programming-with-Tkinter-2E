@@ -11,7 +11,7 @@ paths = Path('.').glob('**/*')
 
 # Create and configure treeview
 tv = ttk.Treeview(
-    root, columns=['size', 'modified'], selectmode='none'
+  root, columns=['size', 'modified'], selectmode='none'
 )
 tv.heading('#0', text='Name')
 tv.heading('size', text='Size', anchor='center')
@@ -64,5 +64,19 @@ def sort(tv, col, parent='', reverse=False):
 for cid in ['#0', 'size', 'modified']:
   tv.heading(cid, command=lambda col=cid: sort(tv, col))
 
+
+status = tk.StringVar()
+tk.Label(root, textvariable=status).pack(side=tk.BOTTOM)
+
+def show_directory_stats(*_):
+  clicked_path = Path(tv.focus())
+  num_children = len(list(clicked_path.iterdir()))
+  status.set(
+    f'Directory: {clicked_path.name}, {num_children} children'
+  )
+
+
+tv.bind('<<TreeviewOpen>>', show_directory_stats)
+tv.bind('<<TreeviewClose>>', lambda _: status.set(''))
 
 root.mainloop()
