@@ -21,6 +21,10 @@ class Application(tk.Tk):
     # Hide window while GUI is built
     self.withdraw()
 
+    # Set taskbar icon
+    self.taskbar_icon = tk.PhotoImage(file=images.ABQ_LOGO_64)
+    self.iconphoto(True, self.taskbar_icon)
+
     # Authenticate
     if not self._show_login():
       self.destroy()
@@ -32,24 +36,14 @@ class Application(tk.Tk):
    # Create model
     self.model = m.CSVModel()
 
-    # Load settings
-    # self.settings = {
-    #   'autofill date': tk.BooleanVar(),
-    #   'autofill sheet data': tk.BoleanVar()
-    # }
+    # load settings
     self.settings_model = m.SettingsModel()
     self._load_settings()
-
-    self.inserted_rows = []
-    self.updated_rows = []
 
     # Begin building GUI
     self.title("ABQ Data Entry Application")
     self.columnconfigure(0, weight=1)
 
-    # Set taskbar icon
-    self.taskbar_icon = tk.PhotoImage(file=images.ABQ_LOGO_64)
-    self.iconphoto(True, self.taskbar_icon)
 
     # Create the menu
     menu = MainMenu(self, self.settings)
@@ -91,9 +85,7 @@ class Application(tk.Tk):
 
     # The data record list
     self.recordlist_icon = tk.PhotoImage(file=images.LIST_ICON)
-    self.recordlist = v.RecordList(
-      self, self.inserted_rows, self.updated_rows
-    )
+    self.recordlist = v.RecordList(self)
     self.notebook.insert(
         0, self.recordlist, text='Records',
         image=self.recordlist_icon, compound=tk.LEFT
@@ -139,10 +131,10 @@ class Application(tk.Tk):
     rownum = self.recordform.current_record
     self.model.save_record(data, rownum)
     if rownum is not None:
-      self.updated_rows.append(rownum)
+      self.recordlist.add_updated_row(rownum)
     else:
       rownum = len(self.model.get_all_records()) -1
-      self.inserted_rows.append(rownum)
+      self.recordlist.add_inserted_row(rownum)
     self.records_saved += 1
     self.status.set(
       "{} records saved this session".format(self.records_saved)
@@ -160,9 +152,8 @@ class Application(tk.Tk):
     )
     if filename:
       self.model = m.CSVModel(filename=filename)
-      self.inserted_rows.clear()
-      self.updated_rows.clear()
       self._populate_recordlist()
+      self.recordlist.clear_tags()
 
   @staticmethod
   def _simple_login(username, password):
@@ -260,7 +251,9 @@ class Application(tk.Tk):
     """Set the application's font"""
     font_size = self.settings['font size'].get()
     font_family = self.settings['font family'].get()
-    font_names = ('TkDefaultFont', 'TkMenuFont', 'TkTextFont')
+    font_names = (
+      'TkDefaultFont', 'TkMenuFont', 'TkTextFont', 'TkFixedFont'
+    )
     for font_name in font_names:
       tk_font = font.nametofont(font_name)
       tk_font.config(size=font_size, family=font_family)
