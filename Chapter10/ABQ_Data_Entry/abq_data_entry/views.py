@@ -126,7 +126,9 @@ class DataRecordForm(tk.Frame):
       field_spec=fields['Lab'],
       var=self._vars['Lab'],
       label_args={'style': 'RecordInfo.TLabel'},
-      input_args={'style': 'RecordInfo.TRadiobutton'}
+      input_args={
+        'button_args':{'style': 'RecordInfo.TRadiobutton'}
+      }
     ).grid(row=1, column=0)
     w.LabelInput(
       r_info, "Plot",
@@ -419,10 +421,11 @@ class RecordList(tk.Frame):
   default_minwidth = 10
   default_anchor = tk.CENTER
 
-  def __init__(self, parent, inserted, updated, *args, **kwargs):
+  def __init__(self, parent, *args, **kwargs):
     super().__init__(parent, *args, **kwargs)
-    self.inserted = inserted
-    self.updated = updated
+    self._inserted = list()
+    self._updated = list()
+
     self.columnconfigure(0, weight=1)
     self.rowconfigure(0, weight=1)
 
@@ -471,9 +474,9 @@ class RecordList(tk.Frame):
     cids = list(self.column_defs.keys())[1:]
     for rownum, rowdata in enumerate(rows):
       values = [rowdata[cid] for cid in cids]
-      if rownum in self.inserted:
+      if rownum in self._inserted:
         tag = 'inserted'
-      elif rownum in self.updated:
+      elif rownum in self._updated:
         tag = 'updated'
       else:
         tag = ''
@@ -490,3 +493,15 @@ class RecordList(tk.Frame):
 
     self.selected_id = int(self.treeview.selection()[0])
     self.event_generate('<<OpenRecord>>')
+
+  def add_updated_row(self, row):
+    if row not in self._updated:
+      self._updated.append(row)
+
+  def add_inserted_row(self, row):
+    if row not in self._inserted:
+      self._inserted.append(row)
+
+  def clear_tags(self):
+    self._inserted.clear()
+    self._updated.clear()

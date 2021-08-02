@@ -41,9 +41,6 @@ class Application(tk.Tk):
     self.settings_model = m.SettingsModel()
     self._load_settings()
 
-    self.inserted_rows = []
-    self.updated_rows = []
-
     # Begin building GUI
     self.title("ABQ Data Entry Application")
     self.columnconfigure(0, weight=1)
@@ -95,9 +92,7 @@ class Application(tk.Tk):
 
     # The data record list
     self.recordlist_icon = tk.PhotoImage(file=images.LIST_ICON)
-    self.recordlist = v.RecordList(
-      self, self.inserted_rows, self.updated_rows
-    )
+    self.recordlist = v.RecordList(self)
     self.notebook.insert(
         0, self.recordlist, text='Records',
         image=self.recordlist_icon, compound=tk.LEFT
@@ -143,10 +138,10 @@ class Application(tk.Tk):
     rownum = self.recordform.current_record
     self.model.save_record(data, rownum)
     if rownum is not None:
-      self.updated_rows.append(rownum)
+      self.recordlist.add_updated_row(rownum)
     else:
       rownum = len(self.model.get_all_records()) -1
-      self.inserted_rows.append(rownum)
+      self.recordlist.add_inserted_row(rownum)
     self.records_saved += 1
     self.status.set(
       "{} records saved this session".format(self.records_saved)
@@ -164,8 +159,7 @@ class Application(tk.Tk):
     )
     if filename:
       self.model = m.CSVModel(filename=filename)
-      self.inserted_rows.clear()
-      self.updated_rows.clear()
+      self.recordlist.clear_tags()
       self._populate_recordlist()
 
   @staticmethod
