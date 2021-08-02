@@ -490,9 +490,12 @@ class RecordList(tk.Frame):
       self.treeview.focus('0')
 
   def _on_open_record(self, *args):
-
-    self.selected_id = int(self.treeview.selection()[0])
     self.event_generate('<<OpenRecord>>')
+
+  @property
+  def selected_id(self):
+    selection = self.treeview.selection()
+    return int(selection[0]) if selection else None
 
   def add_updated_row(self, row):
     if row not in self._updated:
