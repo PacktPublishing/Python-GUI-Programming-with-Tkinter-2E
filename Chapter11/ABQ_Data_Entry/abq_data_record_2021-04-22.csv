@@ -1,0 +1,4 @@
+Date,Time,Technician,Lab,Plot,Seed Sample,Humidity,Light,Temperature,Equipment Fault,Plants,Blossoms,Fruit,Min Height,Max Height,Med Height,Notes
+2021-05-04,8:00,J Simms,A,4,AX3423,8.0,10.0,30.0,False,2,30,42,10.0,15.0,12.0,
+2021-05-04,8:00,J Simms,A,2,ZX23423,2.0,3.0,5.0,False,10,3,2,10.0,30.0,20.0,
+2021-05-04,8:00,J Simms,A,4,AX2433,10.0,11.0,12.0,False,1,2,1,10.0,20.0,15.0,
