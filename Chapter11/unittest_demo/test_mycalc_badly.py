@@ -1,11 +1,11 @@
-from mycalc import MyCalc
+import mycalc
 import unittest
 
 
 class TestMyCalc(unittest.TestCase):
 
   def test_add(self):
-    mc = MyCalc(1, 10)
+    mc = mycalc.MyCalc(1, 10)
     assert mc.add() == 11
 
     # much better error output

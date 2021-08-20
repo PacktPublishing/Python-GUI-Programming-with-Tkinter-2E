@@ -28,15 +28,13 @@ class TkTestCase(TestCase):
     widget.focus_force()
     for char in string:
       char = self.keysyms.get(char, char)
-      self.root.update()
-      widget.event_generate('<KeyPress-{}>'.format(char))
-      self.root.update()
+      widget.event_generate(f'<KeyPress-{char}>')
+      self.root.update_idletasks()
 
   def click_on_widget(self, widget, x, y, button=1):
     widget.focus_force()
-    self.root.update()
-    widget.event_generate("<ButtonPress-{}>".format(button), x=x, y=y)
-    self.root.update()
+    widget.event_generate(f'<ButtonPress-{button}>', x=x, y=y)
+    self.root.update_idletasks()
 
   @staticmethod
   def find_element(widget, element):
@@ -47,7 +45,7 @@ class TkTestCase(TestCase):
     for x in x_coords:
       for y in y_coords:
         if widget.identify(x, y) == element:
-          return (x, y)
+          return (x + 1, y + 1)
     raise Exception(f'{element} was not found in widget')
 
 
@@ -166,11 +164,10 @@ class TestValidatedSpinbox(TkTestCase):
     for _ in range(times):
       self.click_on_widget(self.vsb, x=x, y=y)
 
-  def test__key_validate(self):
+  def test_key_validate(self):
     ###################
     # Unit-test Style #
     ###################
-
     # test valid input
     for x in range(10):
       x = str(x)
@@ -179,19 +176,19 @@ class TestValidatedSpinbox(TkTestCase):
       self.assertTrue(p_valid)
       self.assertTrue(n_valid)
 
-    # test letters
+  def test_key_validate_letters(self):
     valid = self.key_validate('a')
     self.assertFalse(valid)
 
-    # test non-increment number
+  def test_key_validate_increment(self):
     valid = self.key_validate('1', '0.')
     self.assertFalse(valid)
 
-    # test too high number
+  def test_key_validate_high(self):
     valid = self.key_validate('0', '10')
     self.assertFalse(valid)
 
-  def test__key_validate_integration(self):
+  def test_key_validate_integration(self):
     ##########################
     # Integration test style #
     ##########################
@@ -208,7 +205,7 @@ class TestValidatedSpinbox(TkTestCase):
     self.type_in_widget(self.vsb, '200')
     self.assertEqual(self.vsb.get(), '2')
 
-  def test__focusout_validate(self):
+  def test_focusout_validate(self):
 
     # test valid
     for x in range(10):
@@ -233,6 +230,7 @@ class TestValidatedSpinbox(TkTestCase):
 
   def test_arrows(self):
     self.value.set(0)
+    self.vsb.update()
     self.click_arrow('up', times=1)
     self.assertEqual(self.vsb.get(), '1')
 

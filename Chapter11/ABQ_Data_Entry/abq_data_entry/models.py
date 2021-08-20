@@ -88,7 +88,7 @@ class CSVModel:
 
     with open(self.file, 'r', encoding='utf-8') as fh:
       # Casting to list is necessary for unit tests to work
-      csvreader = csv.DictReader(list(fh.readlines()))
+      csvreader = csv.DictReader(fh)
       missing_fields = set(self.fields.keys()) - set(csvreader.fieldnames)
       if len(missing_fields) > 0:
         fields_string = ', '.join(missing_fields)

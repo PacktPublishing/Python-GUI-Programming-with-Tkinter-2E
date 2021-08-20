@@ -32,9 +32,15 @@ class TestApplication(TestCase):
   def setUp(self):
     # can be parenthesized in python 3.10+
     with \
-      patch('abq_data_entry.application.m.CSVModel') as csvmodel,\
-      patch('abq_data_entry.application.m.SettingsModel') as settingsmodel,\
-      patch('abq_data_entry.application.Application._show_login') as show_login,\
+      patch(
+        'abq_data_entry.application.m.CSVModel'
+      ) as csvmodel,\
+      patch(
+        'abq_data_entry.application.m.SettingsModel'
+      ) as settingsmodel,\
+      patch(
+       'abq_data_entry.application.Application._show_login'
+      ) as show_login,\
       patch('abq_data_entry.application.v.DataRecordForm'),\
       patch('abq_data_entry.application.v.RecordList'),\
       patch('abq_data_entry.application.ttk.Notebook'),\
@@ -52,7 +58,6 @@ class TestApplication(TestCase):
 
   def test_show_recordlist(self):
     self.app._show_recordlist()
-    self.app.update()
     self.app.notebook.select.assert_called_with(self.app.recordlist)
 
   def test_populate_recordlist(self):
