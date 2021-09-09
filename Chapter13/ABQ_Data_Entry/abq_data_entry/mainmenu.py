@@ -67,25 +67,18 @@ class GenericMainMenu(tk.Menu):
     menu.add_command(
       label="Update Weather Data",
       command=self._event('<<UpdateWeatherData>>'),
-      accelerator=self.accelerators.get('weather'),
-      image=self.icons.get('weather'),
-      compound=tk.LEFT
     )
 
   def _add_rest_upload(self, menu):
     menu.add_command(
       label="Upload CSV to corporate REST",
       command=self._event('<<UploadToCorporateREST>>'),
-      image=self.icons.get('upload_rest'),
-      compound=tk.LEFT
     )
 
-  def _add_ftp_upload(self, menu):
+  def _add_sftp_upload(self, menu):
     menu.add_command(
-      label="Upload CSV to corporate FTP",
-      command=self._event('<<UploadToCorporateFTP>>'),
-      image=self.icons.get('upload_ftp'),
-      compound=tk.LEFT
+      label="Upload CSV to corporate SFTP",
+      command=self._event('<<UploadToCorporateSFTP>>'),
     )
 
   def _add_autofill_date(self, menu):
@@ -157,7 +150,7 @@ class GenericMainMenu(tk.Menu):
     self._menus['Tools'] = tk.Menu(self, tearoff=False, **self.styles)
     self._add_weather_download(self._menus['Tools'])
     self._add_rest_upload(self._menus['Tools'])
-    self._add_ftp_upload(self._menus['Tools'])
+    self._add_sftp_upload(self._menus['Tools'])
 
     # The options menu
     self._menus['Options'] = tk.Menu(self, tearoff=False, **self.styles)
@@ -265,7 +258,7 @@ class WindowsMainMenu(GenericMainMenu):
     self._add_themes_menu(self._menus['Tools'])
     self._add_weather_download(self._menus['Tools'])
     self._add_rest_upload(self._menus['Tools'])
-    self._add_ftp_upload(self._menus['Tools'])
+    self._add_sftp_upload(self._menus['Tools'])
 
     # The help menu
     self._menus['Help'] = tk.Menu(self, tearoff=False)
@@ -310,7 +303,7 @@ class LinuxMainMenu(GenericMainMenu):
     self._menus['Tools'] = tk.Menu(self, tearoff=False, **self.styles)
     self._add_weather_download(self._menus['Tools'])
     self._add_rest_upload(self._menus['Tools'])
-    self._add_ftp_upload(self._menus['Tools'])
+    self._add_sftp_upload(self._menus['Tools'])
 
     # The View menu
     self._menus['View'] = tk.Menu(self, tearoff=False, **self.styles)
@@ -379,7 +372,7 @@ class MacOsMainMenu(GenericMainMenu):
     self._menus['Tools'] = tk.Menu(self, tearoff=False)
     self._add_weather_download(self._menus['Tools'])
     self._add_rest_upload(self._menus['Tools'])
-    self._add_ftp_upload(self._menus['Tools'])
+    self._add_sftp_upload(self._menus['Tools'])
 
     # View menu
     self._menus['View'] = tk.Menu(self, tearoff=False)

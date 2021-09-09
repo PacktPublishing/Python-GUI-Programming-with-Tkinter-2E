@@ -4,6 +4,11 @@ import os
 import json
 import platform
 from datetime import datetime
+from urllib.request import urlopen
+from xml.etree import ElementTree
+import requests
+import paramiko
+import ftplib as ftp
 
 import psycopg2 as pg
 from psycopg2.extras import DictCursor
@@ -312,16 +317,13 @@ class SettingsModel:
     'db_host': {'type': 'str', 'value': 'localhost'},
     'db_name': {'type': 'str', 'value': 'abq'},
     'weather_station': {'type': 'str', 'value': 'KBMG'},
-    'abq_auth_url': {
+    'abq_rest_url': {
       'type': 'str',
-      'value': 'http://localhost:8000/auth'
+      'value': 'http://localhost:8000'
       },
-    'abq_upload_url': {
-      'type': 'str',
-      'value': 'http://localhost:8000/upload'
-    },
-    'abq_ftp_host': {'type': 'str', 'value': 'localhost'},
-    'abq_ftp_port': {'type': 'int', 'value': 2100}
+    'abq_sftp_host': {'type': 'str', 'value': 'localhost'},
+    'abq_sftp_port': {'type': 'int', 'value': 22},
+    'abq_sftp_path': {'type': 'str', 'value': 'ABQ/BLTN_IN'}
   }
 
   config_dirs = {
@@ -372,3 +374,146 @@ class SettingsModel:
       if key in raw_values and 'value' in raw_values[key]:
         raw_value = raw_values[key]['value']
         self.fields[key]['value'] = raw_value
+
+class WeatherDataModel:
+
+  base_url = 'http://w1.weather.gov/xml/current_obs/{}.xml'
+
+  def __init__(self, station):
+    self.url = self.base_url.format(station)
+
+
+  def get_weather_data(self):
+    response = urlopen(self.url)
+
+    xmlroot = ElementTree.fromstring(response.read())
+    weatherdata = {
+      'observation_time_rfc822': None,
+      'temp_c': None,
+      'relative_humidity': None,
+      'pressure_mb': None,
+      'weather': None
+    }
+
+    for tag in weatherdata:
+      element = xmlroot.find(tag)
+      if element is not None:
+        weatherdata[tag] = element.text
+
+    return weatherdata
+
+
+class CorporateRestModel:
+
+  def __init__(self, base_url):
+
+    self.auth_url = f'{base_url}/auth'
+    self.files_url = f'{base_url}/files'
+    self.session = requests.session()
+
+  @staticmethod
+  def _raise_for_status(response):
+    try:
+      response.raise_for_status()
+    except requests.HTTPError:
+      raise Exception(response.json().get('message'))
+
+  def authenticate(self, username, password):
+    """Authenticate to the server"""
+    response = self.session.post(
+      self.auth_url,
+      data={'username': username, 'password': password}
+    )
+    self._raise_for_status(response)
+
+  def check_file(self, filename):
+    """See if a file exists on the server"""
+    url = f"{self.files_url}/{filename}"
+    response = self.session.head(url)
+    if response.status_code == 200:
+      return True
+    elif response.status_code == 404:
+      return False
+    self._raise_for_status(response)
+
+  def get_file(self, filename):
+    """Download a file from the server"""
+    url = f"{self.files_url}/{filename}"
+    response = self.session.get(url)
+    self._raise_for_status(response)
+    return response.text
+
+  def upload_file(self, filepath):
+    """PUT a file on the server"""
+    with open(filepath, 'rb') as fh:
+      files = {'file': fh}
+      response = self.session.put(
+        self.files_url, files=files
+      )
+    self._raise_for_status(response)
+
+
+class SFTPModel:
+
+  def __init__(self, host, port=22):
+    self.host = host
+    self.port = port
+
+    # setup SSHClient
+    self._client = paramiko.SSHClient()
+    self._client.set_missing_host_key_policy(
+      paramiko.AutoAddPolicy()
+    )
+    self._client.load_system_host_keys()
+
+
+  def authenticate(self, username, password):
+    try:
+      self._client.connect(
+        self.host, username=username,
+        password=password, port=self.port
+      )
+    except paramiko.AuthenticationException:
+      raise Exception(
+        'The username and password were not accepted by the server.'
+      )
+
+  def _check_auth(self):
+    transport = self._client.get_transport()
+    if not transport.is_active() and transport.is_authenticated():
+      raise Exception('Not connected to a server.')
+
+
+  def check_file(self, remote_path):
+    """Check if the file at remote_path exists"""
+    self._check_auth()
+    sftp = self._client.open_sftp()
+    try:
+      sftp.stat(remote_path)
+    except FileNotFoundError:
+      return False
+    return True
+
+  def upload_file(self, local_path, remote_path):
+    """Upload file at local_path to remote_path
+
+    Both paths must include a filename
+    """
+    self._check_auth()
+    sftp = self._client.open_sftp()
+
+    # Create the dstination path if it doesn't exist
+    remote_path = Path(remote_path)
+    for directory in remote_path.parent.parts:
+      if directory not in sftp.listdir():
+        sftp.mkdir(directory)
+      sftp.chdir(directory)
+    # copy the file
+    # just use filename because our CWD should
+    # be the full path without the name
+    sftp.put(local_path, remote_path.name)
+
+  def get_file(self, remote_path, local_path):
+    self._check_auth()
+    sftp = self._client.open_sftp()
+    sftp.get(remote_path, local_path)

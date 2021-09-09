@@ -11,7 +11,6 @@ from . import views as v
 from . import models as m
 from .mainmenu import get_main_menu_for_os
 from . import images
-from . import network as n
 
 
 class Application(tk.Tk):
@@ -63,7 +62,7 @@ class Application(tk.Tk):
       '<<NewRecord>>': self._new_record,
       '<<UpdateWeatherData>>': self._update_weather_data,
       '<<UploadToCorporateREST>>': self._upload_to_corporate_rest,
-      '<<UploadToCorporateFTP>>': self._upload_to_corporate_ftp,
+      '<<UploadToCorporateSFTP>>': self._upload_to_corporate_sftp,
      }
     for sequence, callback in event_callbacks.items():
       self.bind(sequence, callback)
@@ -286,10 +285,11 @@ class Application(tk.Tk):
   # new chapter 13
   def _update_weather_data(self, *_):
     """Initiate retrieval and storage of weather data"""
+    weather_data_model = m.WeatherDataModel(
+      self.settings['weather_station'].get()
+    )
     try:
-      weather_data = n.get_local_weather(
-        self.settings['weather_station'].get()
-      )
+      weather_data = weather_data_model.get_weather_data()
     except Exception as e:
       messagebox.showerror(
         title='Error',
@@ -306,51 +306,102 @@ class Application(tk.Tk):
     csvmodel = m.CSVModel()
     records = self.model.get_all_records()
     if not records:
-      return None
+      raise Exception('No records were found to build a CSV file.')
     for record in records:
       csvmodel.save_record(record)
     return csvmodel.file
 
-  def _upload_to_corporate_ftp(self, *_):
 
-    csvfile = self._create_csv_extract()
-    d = v.LoginDialog(self, 'Login to ABQ Corporate FTP')
+  def _upload_to_corporate_sftp(self, *_):
+
+    # create csv file
+    try:
+      csvfile = self._create_csv_extract()
+    except Exception as e:
+      messagebox.showwarning(
+        title='Error', message=str(e)
+      )
+      return
+
+    # authenticate
+    d = v.LoginDialog(self, 'Login to ABQ Corporate SFTP')
     if d.result is None:
       return
     username, password = d.result
-    host = self.settings['abq_ftp_host'].get()
-    port = self.settings['abq_ftp_port'].get()
+
+    # create model
+    host = self.settings['abq_sftp_host'].get()
+    port = self.settings['abq_sftp_port'].get()
+    sftp_model = m.SFTPModel(host, port)
     try:
-      n.upload_to_corporate_ftp(
-        csvfile, host, port, username, password
-      )
-    except n.ftp.all_errors as e:
-      messagebox.showerror('Error Uploading File.', str(e))
+      sftp_model.authenticate(username, password)
+    except Exception as e:
+      messagebox.showerror('Error Authenticating', str(e))
       return
+
+    # check destination file
+    destination_dir = self.settings['abq_sftp_path'].get()
+    destination_path = f'{destination_dir}/{csvfile.name}'
+
     try:
-      files = n.get_corporate_ftp_files(
-        host, port, username, password
-      )
-    except n.ftp.all_errors as e:
+      exists = sftp_model.check_file(destination_path)
+    except Exception as e:
       messagebox.showerror(
-        'Error listing Files (file uploaded OK)',
+        f'Error checking file {destination_path}',
         str(e)
       )
       return
-    filestring = '\n'.join(f'* {f}' for f in files)
-    messagebox.showinfo(
-      'Success', f'{csvfile} successfully uploaded to FTP \n\n'
-      f'Current files on the server are: \n\n {filestring}'
-    )
+    if exists:
+      # ask if we should overwrite
+      overwrite = messagebox.askyesno(
+        'File exists',
+        f'The file {destination_path} already exists on the server, '
+        'do you want to overwrite it?'
+      )
+      if not overwrite:
+        # ask if we should download it
+        download = messagebox.askyesno(
+          'Download file',
+          'Do you want to download the file to inspect it?'
+        )
+        if download:
+          # get a destination filename and save
+          filename = filedialog.asksaveasfilename()
+          if not filename:
+            return
+          try:
+            sftp_model.get_file(destination_path, filename)
+          except Exception as e:
+            messagebox.showerror('Error downloading', str(e))
+            return
+          messagebox.showinfo(
+            'Download Complete', 'Download Complete.'
+            )
+        return
+    # if we haven't returned, the user wants to upload
+    try:
+      sftp_model.upload_file(csvfile, destination_path)
+    except Exception as e:
+      messagebox.showerror('Error uploading', str(e))
+    else:
+      messagebox.showinfo(
+        'Success',
+        f'{csvfile} successfully uploaded to SFTP server.'
+      )
+
 
   def _upload_to_corporate_rest(self, *_):
-    csvfile = self._create_csv_extract()
-    if csvfile is None:
+
+    # create csv file
+    try:
+      csvfile = self._create_csv_extract()
+    except Exception as e:
       messagebox.showwarning(
-        title='No records',
-        message='There are no records to upload'
+        title='Error', message=str(e)
       )
       return
+
+    # Authenticate to the rest server
     d = v.LoginDialog(
       self, 'Login to ABQ Corporate REST API'
     )
@@ -358,18 +409,58 @@ class Application(tk.Tk):
       username, password = d.result
     else:
       return
+
+    # create REST model
+    rest_model = m.CorporateRestModel(
+        self.settings['abq_rest_url'].get()
+    )
     try:
-      n.upload_to_corporate_rest(
-        csvfile,
-        self.settings['abq_upload_url'].get(),
-        self.settings['abq_auth_url'].get(),
-        username,
-        password
-      )
-    except n.requests.ConnectionError as e:
-      messagebox.showerror('Error connecting', str(e))
+      rest_model.authenticate(username, password)
     except Exception as e:
-      messagebox.showerror('General Exception', str(e))
+      messagebox.showerror('Error authenticating', str(e))
+      return
+
+    # Check if the file exists
+    try:
+      exists = rest_model.check_file(csvfile.name)
+    except Exception as e:
+      messagebox.showerror('Error checking for file', str(e))
+      return
+
+    if exists:
+      # ask if we should overwrite
+      overwrite = messagebox.askyesno(
+        'File exists',
+        f'The file {csvfile.name} already exists on the server, '
+        'do you want to overwrite it?'
+      )
+      if not overwrite:
+        # ask if we should download it
+        download = messagebox.askyesno(
+          'Download file',
+          'Do you want to download the file to inspect it?'
+        )
+        if download:
+          # get a destination filename and save
+          filename = filedialog.asksaveasfilename()
+          if not filename:
+            return
+          try:
+            data = rest_model.get_file(csvfile.name)
+          except Exception as e:
+            messagebox.showerror('Error downloading', str(e))
+            return
+          with open(filename, 'w', encoding='utf-8') as fh:
+            fh.write(data)
+          messagebox.showinfo(
+            'Download Complete', 'Download Complete.'
+            )
+        return
+    # if we haven't returned, the user wants to upload
+    try:
+      rest_model.upload_file(csvfile)
+    except Exception as e:
+      messagebox.showerror('Error uploading', str(e))
     else:
       messagebox.showinfo(
         'Success',

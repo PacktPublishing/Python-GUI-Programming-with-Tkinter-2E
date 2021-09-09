@@ -6,7 +6,7 @@ INSERT INTO lab_techs VALUES
     ;
 
 INSERT INTO labs VALUES
-    ('A'), ('B'), ('C'), ('D'), ('E');
+    ('A'), ('B'), ('C');
 
 INSERT INTO plots (SELECT labs.id, plotnums.plot
 FROM labs, (SELECT generate_series(1, 20) plot) AS plotnums);
