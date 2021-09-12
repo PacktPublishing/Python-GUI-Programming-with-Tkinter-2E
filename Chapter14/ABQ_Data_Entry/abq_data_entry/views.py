@@ -114,6 +114,7 @@ class DataRecordForm(tk.Frame):
       var=self._vars['Time'],
       label_args={'style': 'RecordInfo.TLabel'}
     ).grid(row=0, column=1)
+    # swap order for chapter 12
     w.LabelInput(
       r_info, "Lab",
       field_spec=fields['Lab'],
@@ -462,12 +463,15 @@ class RecordList(tk.Frame):
   default_minwidth = 10
   default_anchor = tk.CENTER
 
-  def __init__(self, parent, inserted, updated, *args, **kwargs):
+  def __init__(self, parent, *args, **kwargs):
     super().__init__(parent, *args, **kwargs)
-    self.inserted = inserted
-    self.updated = updated
+    self._inserted = list()
+    self._updated = list()
     self.columnconfigure(0, weight=1)
     self.rowconfigure(0, weight=1)
+
+    # New ch12
+    self.iid_map = dict()
 
     # create treeview
     self.treeview = ttk.Treeview(
@@ -511,16 +515,6 @@ class RecordList(tk.Frame):
 
   # new for ch12
 
-  @staticmethod
-  def _rowkey_to_iid(rowkey):
-    """Convert a rowkey tuple to an IID string"""
-    return '{}|{}|{}|{}'.format(*rowkey)
-
-  @staticmethod
-  def _iid_to_rowkey(iid):
-    """Convert an IID string to a rowkey tuple"""
-    return tuple(iid.split("|"))
-
   # update for ch12
   def populate(self, rows):
     """Clear the treeview and write the supplied data rows to it."""
@@ -528,19 +522,22 @@ class RecordList(tk.Frame):
     for row in self.treeview.get_children():
       self.treeview.delete(row)
 
+    self.iid_map.clear()
+
     cids = list(self.column_defs.keys())[1:]
     for rowdata in rows:
       values = [rowdata[key] for key in cids]
       rowkey = tuple([str(v) for v in values])
-      if rowkey in self.inserted:
+      if rowkey in self._inserted:
         tag = 'inserted'
-      elif rowkey in self.updated:
+      elif rowkey in self._updated:
         tag = 'updated'
       else:
         tag = ''
-      iid = self._rowkey_to_iid(rowkey)
-      self.treeview.insert(
-        '', 'end', iid=iid, text=iid, values=values, tag=tag)
+      # new ch12 -- save generated IID, assign to rowkey
+      iid = self.treeview.insert(
+        '', 'end', values=values, tag=tag)
+      self.iid_map[iid] = rowkey
 
     if len(rows) > 0:
       firstrow = self.treeview.identify_row(0)
@@ -551,6 +548,22 @@ class RecordList(tk.Frame):
   # update for ch12
   def _on_open_record(self, *_):
     """Handle record open request"""
-    selected_iid = self.treeview.selection()[0]
-    self.selected_id = self._iid_to_rowkey(selected_iid)
     self.event_generate('<<OpenRecord>>')
+
+  @property
+  def selected_id(self):
+    selection = self.treeview.selection()
+    return self.iid_map[selection[0]] if selection else None
+
+
+  def add_updated_row(self, row):
+    if row not in self._updated:
+      self._updated.append(row)
+
+  def add_inserted_row(self, row):
+    if row not in self._inserted:
+      self._inserted.append(row)
+
+  def clear_tags(self):
+    self._inserted.clear()
+    self._updated.clear()
