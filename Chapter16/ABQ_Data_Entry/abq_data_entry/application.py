@@ -12,7 +12,6 @@ from . import views as v
 from . import models as m
 from .mainmenu import get_main_menu_for_os
 from . import images
-from . import network as n
 
 
 class Application(tk.Tk):
@@ -67,6 +66,8 @@ class Application(tk.Tk):
       '<<UpdateWeatherData>>': self._update_weather_data,
       '<<UploadToCorporateREST>>': self._upload_to_corporate_rest,
       '<<UploadToCorporateSFTP>>': self._upload_to_corporate_sftp,
+      '<<ShowGrowthChart>>': self.show_growth_chart,
+      '<<ShowYieldChart>>': self.show_yield_chart
      }
     for sequence, callback in event_callbacks.items():
       self.bind(sequence, callback)
@@ -485,3 +486,33 @@ class Application(tk.Tk):
       else:
         self.status.set(f'{item.subject}: {item.body}')
     self.after(100, self._check_queue, queue)
+
+  #New for ch15
+  def show_growth_chart(self, *_):
+    data = self.model.get_growth_by_lab()
+    popup = tk.Toplevel()
+    chart = v.LineChartView(
+       popup, data, (800, 400),
+       'Day', 'Avg Height (cm)', 'lab_id'
+    )
+    chart.pack(fill='both', expand=1)
+
+  def show_yield_chart(self, *_):
+    popup = tk.Toplevel()
+    chart = v.YieldChartView(
+      popup,
+      'Average plot humidity', 'Average Plot temperature',
+      'Yield as a product of humidity and temperature'
+    )
+    chart.pack(fill='both', expand=True)
+    data = self.model.get_yield_by_plot()
+    seed_colors = {
+      'AXM477': 'red', 'AXM478': 'yellow',
+      'AXM479': 'green', 'AXM480': 'blue'
+    }
+    for seed, color in seed_colors.items():
+      seed_data = [
+       (x['avg_humidity'], x['avg_temperature'], x['yield'])
+       for x in data if x['seed_sample'] == seed
+      ]
+      chart.draw_scatter(seed_data, color, seed)

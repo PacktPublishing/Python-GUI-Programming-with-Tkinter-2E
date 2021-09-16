@@ -88,7 +88,7 @@ class SQLModel:
     self.connection = pg.connect(host=host, database=database,
       user=user, password=password, cursor_factory=DictCursor)
 
-    techs = self.query("SELECT * FROM lab_techs ORDER BY name")
+    techs = self.query("SELECT name FROM lab_techs ORDER BY name")
     labs = self.query("SELECT id FROM labs ORDER BY id")
     plots = self.query("SELECT DISTINCT plot FROM plots ORDER BY plot")
     self.fields['Technician']['values'] = [x['name'] for x in techs]
@@ -96,13 +96,8 @@ class SQLModel:
     self.fields['Plot']['values'] = [str(x['plot']) for x in plots]
 
   def query(self, query, parameters=None):
-    cursor = self.connection.cursor()
-    try:
+    with self.connection.cursor() as cursor:
       cursor.execute(query, parameters)
-    except (pg.Error) as e:
-      self.connection.rollback()
-      raise e
-    else:
       self.connection.commit()
       # cursor.description is None when
       # no rows are returned
@@ -134,7 +129,7 @@ class SQLModel:
       query,
       {"date": date, "time": time, "lab": lab, "plot": plot}
     )
-    return result[0] if result else {}
+    return result[0] if result else dict()
 
   def save_record(self, record, rowkey):
     """Save a record to the database
@@ -175,7 +170,7 @@ class SQLModel:
       'lab_id = %(lab)s AND date = %(date)s AND time = %(time)s')
     results = self.query(
       query, {'date': date, 'time': time, 'lab': lab})
-    return results[0] if results else {}
+    return results[0] if results else dict()
 
   def get_current_seed_sample(self, lab, plot):
     """Get the seed sample currently planted in the given lab and plot"""

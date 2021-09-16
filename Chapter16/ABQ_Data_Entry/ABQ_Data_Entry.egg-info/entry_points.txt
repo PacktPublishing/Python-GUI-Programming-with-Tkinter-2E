@@ -1,0 +1,3 @@
+[console_scripts]
+abq = abq_data_entry.__main__:main
+
