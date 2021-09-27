@@ -96,13 +96,13 @@ class SQLModel:
     self.fields['Plot']['values'] = [str(x['plot']) for x in plots]
 
   def query(self, query, parameters=None):
-    with self.connection.cursor() as cursor:
-      cursor.execute(query, parameters)
-      self.connection.commit()
+    with self.connection:
+      with self.connection.cursor() as cursor:
+        cursor.execute(query, parameters)
       # cursor.description is None when
       # no rows are returned
-      if cursor.description is not None:
-        return cursor.fetchall()
+        if cursor.description is not None:
+          return cursor.fetchall()
 
   def get_all_records(self, all_dates=False):
     """Return all records.

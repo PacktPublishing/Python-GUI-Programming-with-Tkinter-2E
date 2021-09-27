@@ -80,7 +80,7 @@ class SQLModel:
     self.connection = pg.connect(host=host, database=database,
       user=user, password=password, cursor_factory=DictCursor)
 
-    techs = self.query("SELECT * FROM lab_techs ORDER BY name")
+    techs = self.query("SELECT name FROM lab_techs ORDER BY name")
     labs = self.query("SELECT id FROM labs ORDER BY id")
     plots = self.query("SELECT DISTINCT plot FROM plots ORDER BY plot")
     self.fields['Technician']['values'] = [x['name'] for x in techs]
@@ -88,18 +88,13 @@ class SQLModel:
     self.fields['Plot']['values'] = [str(x['plot']) for x in plots]
 
   def query(self, query, parameters=None):
-    cursor = self.connection.cursor()
-    try:
-      cursor.execute(query, parameters)
-    except (pg.Error) as e:
-      self.connection.rollback()
-      raise e
-    else:
-      self.connection.commit()
+    with self.connection:
+      with self.connection.cursor() as cursor:
+        cursor.execute(query, parameters)
       # cursor.description is None when
       # no rows are returned
-      if cursor.description is not None:
-        return cursor.fetchall()
+        if cursor.description is not None:
+          return cursor.fetchall()
 
   def get_all_records(self, all_dates=False):
     """Return all records.
