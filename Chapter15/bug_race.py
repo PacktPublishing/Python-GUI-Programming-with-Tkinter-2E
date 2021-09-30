@@ -1,8 +1,14 @@
+"""Bug Race
+
+A demo for the Tkinter Canvas
+"""
+
 import tkinter as tk
 from queue import Queue
 from random import randint
 
 class App(tk.Tk):
+  """Main application class"""
 
   def __init__(self):
     super().__init__()
@@ -29,14 +35,15 @@ class App(tk.Tk):
       Racer(self.canvas, 'red'),
       Racer(self.canvas, 'green')
     ]
-    self.check_for_winner()
+    self.execute_frame()
 
-  def check_for_winner(self):
+  def execute_frame(self):
     for racer in self.racers:
+      racer.next_move()
       if self.finish_line in racer.overlapping:
         self.declare_winner(racer)
         return
-    self.after(Racer.FRAME_RES, self.check_for_winner)
+    self.after(Racer.FRAME_RES, self.execute_frame)
 
   def declare_winner(self, racer):
 
@@ -50,8 +57,7 @@ class App(tk.Tk):
     self.canvas.tag_bind(wintext, '<Button-1>', self.reset)
 
   def reset(self, *args):
-    for item in self.canvas.find_all():
-      self.canvas.delete(item)
+    self.canvas.delete('all')
     self.setup()
 
 
@@ -80,9 +86,8 @@ class Racer:
       (canvas.left + size, canvas.center_y + size),
       fill=color
     )
-    self.animation_queue = Queue()
+    self.movement_queue = Queue()
     self.plot_course()
-    self.animate()
 
   def plot_course(self):
     start_x = self.canvas.left
@@ -101,11 +106,10 @@ class Racer:
       total_dx += dx
       total_dy += dy
 
-  def animate(self):
-    if not self.animation_queue.empty():
-      nextmove = self.animation_queue.get()
+  def next_move(self):
+    if not self.movement_queue.empty():
+      nextmove = self.movement_queue.get()
       self.canvas.move(self.id, *nextmove)
-    self.canvas.after(self.FRAME_RES, self.animate)
 
   def queue_move(self, dx, dy, time):
     num_steps = time // self.FRAME_RES
@@ -114,7 +118,7 @@ class Racer:
       self.partition(dy, num_steps))
 
     for step in steps:
-      self.animation_queue.put(step)
+      self.movement_queue.put(step)
 
   @property
   def overlapping(self):

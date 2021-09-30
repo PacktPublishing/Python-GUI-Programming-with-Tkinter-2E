@@ -12,7 +12,6 @@ from . import views as v
 from . import models as m
 from .mainmenu import get_main_menu_for_os
 from . import images
-from . import network as n
 
 
 class Application(tk.Tk):
@@ -502,7 +501,7 @@ class Application(tk.Tk):
     popup = tk.Toplevel()
     chart = v.YieldChartView(
       popup,
-      'Average plot humidity', 'Average Plot temperature',
+      'Average plot humidity', 'Average plot temperature',
       'Yield as a product of humidity and temperature'
     )
     chart.pack(fill='both', expand=True)

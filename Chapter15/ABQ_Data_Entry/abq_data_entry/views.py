@@ -610,20 +610,24 @@ class LineChartView(tk.Canvas):
     )
     # Draw chart
     self.origin = (self.margin, view_height - self.margin)
-    self.create_line(
-      self.origin, (self.margin, self.margin), width=2
-    )
+    # X axis
     self.create_line(
       self.origin,
       (view_width - self.margin, view_height - self.margin)
     )
+    # Y axis
+    self.create_line(
+      self.origin, (self.margin, self.margin), width=2
+    )
+    # X axis label
     self.create_text(
       (view_width // 2, view_height - self.margin),
       text=x_field, anchor='n'
     )
+    # Y axis label
     self.create_text(
-       (self.margin, view_height // 2),
-       text=y_field, angle=90, anchor='s'
+      (self.margin, view_height // 2),
+      text=y_field, angle=90, anchor='s'
     )
     self.plot_area = tk.Canvas(
       self, background='#555',
@@ -635,8 +639,8 @@ class LineChartView(tk.Canvas):
 
     # Draw legend and lines
     plot_names = sorted(set([
-        row[self.plot_by_field]
-        for row in self.data
+      row[self.plot_by_field]
+      for row in self.data
     ]))
 
     color_map = list(zip(plot_names, self.colors))
@@ -669,10 +673,11 @@ class LineChartView(tk.Canvas):
 
   def _draw_legend(self, color_map):
     # determine legend
-    y = 10
-    for label, color in color_map:
-      self.plot_area.create_text((10, y), text=label, fill=color, anchor='w')
-      y += 20
+    for i, (label, color) in enumerate(color_map):
+      self.plot_area.create_text(
+        (10, 10 + (i * 20)),
+        text=label, fill=color, anchor='w'
+      )
 
 
 class YieldChartView(tk.Frame):
@@ -692,10 +697,10 @@ class YieldChartView(tk.Frame):
     self.scatter_labels = list()
 
   def draw_scatter(self, data, color, label):
-    x, y, s = zip(*data)
-    s = [(x ** 2)//2 for x in s]
+    x, y, size = zip(*data)
+    scaled_size = [(s ** 2)//2 for s in size]
     scatter = self.axes.scatter(
-      x, y, s,
+      x, y, scaled_size,
       c=color, label=label, alpha=0.5
     )
     self.scatters.append(scatter)

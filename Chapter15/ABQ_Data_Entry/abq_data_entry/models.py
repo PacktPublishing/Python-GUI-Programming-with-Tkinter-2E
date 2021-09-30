@@ -203,7 +203,7 @@ class SQLModel:
 
   def get_yield_by_plot(self):
     query = (
-      'SELECT lab_id, plot, seed_sample, MAX(fruit) AS yield, '
+      'SELECT seed_sample, MAX(fruit) AS yield, '
       'AVG(humidity) AS avg_humidity, '
       'AVG(temperature) AS avg_temperature '
       'FROM plot_checks WHERE NOT equipment_fault '
