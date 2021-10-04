@@ -1,0 +1,94 @@
+BODY {
+    background-color: #DDF;
+    font-family: Times New Roman, Serif;
+    font-size: 16pt;
+    margin: 0;
+}
+
+h1.title {
+    font-variant: small-caps;
+    font-size: 20pt;
+    text-decoration: none;
+    border-bottom: 4px double silver;
+    background-color: navy;
+    color: #EEE;
+    margin: 0;
+    padding: .5em 1em;
+    text-shadow: 2px 2px 5px red;
+    text-align: center;
+}
+
+h1 {
+    font-size: 1.3em;
+    text-decoration: underline;
+}
+
+h2 {
+    font-size: 1.1em;
+}
+
+UL {
+    padding-left: 2em;
+}
+
+LI {
+    line-height: 1em;
+    margin: 0;
+}
+
+LI P {
+    margin: .25em;
+    padding: 0;
+}
+
+pre.literal-block {
+    background-color: #EEE;
+    padding: 1em 3em;
+    border: 2px inset silver;
+}
+
+.literal {
+    background-color: #EEE;
+    border: 1px solid silver;
+    font-family: Mono;
+}
+
+.document {
+    padding: 0;
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 50em;
+    box-shadow: 4px 4px 10px black;
+    background-color: #EEF;
+}
+
+.document>.section {
+    padding: .5em 2em 0 1em;
+}
+
+
+TABLE {
+    border: 1px solid silver;
+    width: 100%;
+}
+
+TABLE TH {
+    border: 1px solid silver;
+    border-collapse: collapse;
+    background-color: #CCC;
+    text-align: left;
+    font-weight: bold;
+    padding: 0;
+}
+
+TABLE TD {
+    border: 1px solid silver;
+    border-collapse: collapse;
+    background-color: #EEE;
+    padding: 0;
+}
+
+TABLE TD P {
+    padding: 0;
+    margin: .25em;
+}
