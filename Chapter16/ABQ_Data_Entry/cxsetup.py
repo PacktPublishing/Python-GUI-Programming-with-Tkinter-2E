@@ -3,11 +3,9 @@ import platform
 import os
 
 base = None
-include_files = [('abq_data_entry/images', 'images')]
 target_name = 'abq'
 if platform.system() == "Windows":
   base = "Win32GUI"
-  target_name = f'{target_name}.exe'
 
 shortcut_data = [
   # (Type, Folder, Name, ?, Target exe, arguments, description, hotkey, icon, icon index, show cmd, Working dir)
@@ -49,7 +47,7 @@ cx.setup(
         'jupyter_client', 'jupyter_core', 'ipykernel',
         'ipython_genutils'
       ],
-      'include_files': include_files
+      'include_files': [('abq_data_entry/images', 'images')]
     },
     'bdist_msi': {
       # can be generated in powershell: "{"+[System.Guid]::NewGuid().ToString().ToUpper()+"}"

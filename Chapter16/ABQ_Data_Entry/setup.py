@@ -2,12 +2,6 @@ from setuptools import setup
 
 with open('README.rst', 'r') as fh:
   long_description = fh.read()
-with open('requirements.txt', 'r') as fh:
-  requirements = [
-    line.strip()
-    for line in fh.readlines()
-    if line.strip() and not line.startswith('#')
-  ]
 
 setup(
   name='ABQ_Data_Entry',
@@ -23,7 +17,9 @@ setup(
     'abq_data_entry.images',
     'abq_data_entry.test'
   ],
-  install_requires=requirements,
+  install_requires=[
+      'requests', 'paramiko', 'matplotlib', 'psycopg2'
+  ],
   python_requires='>=3.6',
   package_data={'abq_data_entry.images': ['*.png', '*.xbm']},
   entry_points={
