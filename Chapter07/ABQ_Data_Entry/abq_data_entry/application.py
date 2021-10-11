@@ -69,7 +69,7 @@ class Application(tk.Tk):
     self.statusbar.grid(sticky=(tk.W + tk.E), row=3, padx=10)
 
 
-    self.records_saved = 0
+    self._records_saved = 0
 
 
   def _on_save(self, *_):
@@ -96,9 +96,9 @@ class Application(tk.Tk):
 
     data = self.recordform.get()
     self.model.save_record(data)
-    self.records_saved += 1
+    self._records_saved += 1
     self.status.set(
-      "{} records saved this session".format(self.records_saved)
+      "{} records saved this session".format(self._records_saved)
     )
     self.recordform.reset()
 
