@@ -8,7 +8,7 @@ setup(
   version='1.0',
   author='Alan D Moore',
   author_email='alandmoore@example.com',
-  description='Data entry application for ABQ Agrilabs',
+  description='Data entry application for ABQ AgriLabs',
   url="http://abq.example.com",
   license='ABQ corporate license',
   long_description=long_description,
