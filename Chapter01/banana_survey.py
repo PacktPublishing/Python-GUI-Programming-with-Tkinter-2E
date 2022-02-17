@@ -120,7 +120,7 @@ color_inp.grid(row=5, columnspan=2, sticky=tk.W + tk.E, padx=25)
 plantain_yes_inp.pack(side='left', fill='x', ipadx=10, ipady=5)
 plantain_no_inp.pack(side='left', fill='x', ipadx=10, ipady=5)
 plantain_label.grid(row=6, columnspan=2, sticky=tk.W)
-plantain_frame.grid(row=7, columnspan=2, stick=tk.W)
+plantain_frame.grid(row=7, columnspan=2, sticky=tk.W)
 
 # Sticky on all sides will allow the widget to fill vertical and horizontal
 banana_haiku_label.grid(row=8, sticky=tk.W)
